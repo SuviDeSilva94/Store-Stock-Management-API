@@ -4,25 +4,18 @@ echo "🧪 Running Tests for Store Stock Management API"
 echo "=============================================="
 echo ""
 
-if ! command -v pytest &> /dev/null; then
-    echo "Installing pytest..."
-    pip install pytest pytest-cov httpx
+echo "📦 Checking Docker services..."
+if ! docker-compose ps | grep -q "Up"; then
+    echo "⚠️  Docker containers are not running!"
+    echo "Starting Docker Compose services..."
+    docker-compose up -d
+    echo "Waiting for services to be ready..."
+    sleep 5
 fi
 
-echo "📦 Installing dependencies..."
-pip install -r requirements.txt -q
-
 echo ""
-echo "🏃 Running unit tests..."
-pytest tests/unit/ -v
-
-echo ""
-echo "🏃 Running integration tests..."
-pytest tests/integration/ -v
-
-echo ""
-echo "📊 Generating coverage report..."
-pytest --cov=app --cov-report=term --cov-report=html
+echo "🏃 Running all tests inside Docker container..."
+docker-compose exec api pytest tests/ -v --cov=app --cov-report=term --cov-report=html
 
 echo ""
 echo "✅ Tests complete!"

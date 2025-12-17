@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Optional
 from app.domain.user_models import User
-from app.infrastructure.user_repository import UserRepository
+from app.domain.interfaces import IUserRepository
 from app.core.security import (
     verify_password,
     get_password_hash,
@@ -22,7 +22,7 @@ class UserAlreadyExistsError(ApplicationError):
 
 
 class AuthService:
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: IUserRepository):
         self.user_repository = user_repository
     
     def authenticate_user(self, username: str, password: str) -> Optional[User]:

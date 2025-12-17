@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.infrastructure.database import get_db
 from app.infrastructure.repositories import SQLAlchemyProductRepository
 from app.infrastructure.user_repository import UserRepository
-from app.domain.interfaces import IProductRepository
+from app.domain.interfaces import IProductRepository, IUserRepository
 from app.domain.services import ProductService
 from app.domain.auth_service import AuthService
 from app.domain.user_models import User
@@ -27,19 +27,19 @@ def get_product_service(
     return ProductService(repository)
 
 
-def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
+def get_user_repository(db: Session = Depends(get_db)) -> IUserRepository:
     return UserRepository(db)
 
 
 def get_auth_service(
-    user_repository: UserRepository = Depends(get_user_repository)
+    user_repository: IUserRepository = Depends(get_user_repository)
 ) -> AuthService:
     return AuthService(user_repository)
 
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    user_repository: UserRepository = Depends(get_user_repository)
+    user_repository: IUserRepository = Depends(get_user_repository)
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
