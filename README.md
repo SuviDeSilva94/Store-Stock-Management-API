@@ -17,21 +17,32 @@ This is a API for managing store product stocks. The API lets you create product
 
 ## Quick Start
 
-1. **Clone the repo**
+**You'll need:** Docker installed on your machine.
+
+**1. Start the application**
 ```bash
-git clone <your-repo-url>
-cd ik
+docker-compose up -d
 ```
 
-2. **Run with Docker**
-```bash
-chmod +x run.sh
-./run.sh
+Wait about 10 seconds for the database to initialize.
+
+**2. Open in your browser**
+```
+http://localhost:8001/docs
 ```
 
-The API will be available at `http://localhost:8001`
+**3. Register and login**
+- Use the `/api/v1/auth/register` endpoint to create a user
+- Use the `/api/v1/auth/login` endpoint to get your access token
+- Click the "Authorize" button (top right) and paste your token
+- Now you can use all the product endpoints!
 
-API docs: `http://localhost:8001/docs`
+**4. Stop when done**
+```bash
+docker-compose down
+```
+
+That's it! 🚀
 
 ## Authentication
 
