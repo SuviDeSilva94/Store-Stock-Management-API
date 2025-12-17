@@ -42,3 +42,28 @@ def client(test_db: Session) -> TestClient:
         yield test_client
     
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def test_user(client: TestClient) -> dict:
+    user_data = {
+        "username": "testuser",
+        "email": "test@example.com",
+        "password": "testpass123"
+    }
+    response = client.post("/api/v1/auth/register", json=user_data)
+    return {**user_data, "id": response.json()["id"]}
+
+
+@pytest.fixture
+def auth_token(client: TestClient, test_user: dict) -> str:
+    response = client.post(
+        "/api/v1/auth/login",
+        data={"username": test_user["username"], "password": test_user["password"]}
+    )
+    return response.json()["access_token"]
+
+
+@pytest.fixture
+def auth_headers(auth_token: str) -> dict:
+    return {"Authorization": f"Bearer {auth_token}"}

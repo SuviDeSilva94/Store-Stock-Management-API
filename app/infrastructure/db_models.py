@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.sql import func
 from app.infrastructure.database import Base
 
@@ -19,3 +19,22 @@ class ProductModel(Base):
     
     def __repr__(self) -> str:
         return f"<ProductModel(id={self.id}, sku='{self.sku}', stock={self.stock})>"
+
+
+class UserModel(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, nullable=False, index=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    hashed_password = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+    
+    def __repr__(self) -> str:
+        return f"<UserModel(id={self.id}, username='{self.username}', email='{self.email}')>"

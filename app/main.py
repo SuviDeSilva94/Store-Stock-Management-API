@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.infrastructure.database import create_tables
-from app.api.routers import products_router
+from app.api.routers import products_router, auth_router
 
 
 app = FastAPI(
@@ -34,6 +34,7 @@ async def shutdown_event():
     print(f"👋 {settings.APP_NAME} shutting down")
 
 
+app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
 app.include_router(products_router, prefix=settings.API_V1_PREFIX)
 
 

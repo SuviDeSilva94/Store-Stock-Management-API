@@ -7,7 +7,8 @@ from app.api.schemas import (
     StockAdjustment,
     ErrorResponse
 )
-from app.api.dependency_factories import get_product_service
+from app.api.dependency_factories import get_product_service, get_current_user
+from app.domain.user_models import User
 from app.api.error_handlers import handle_service_error
 from app.domain.services import ProductService
 from app.core.exceptions import (
@@ -33,7 +34,8 @@ router = APIRouter(prefix="/products", tags=["Products"])
 )
 def create_product(
     product: ProductCreate,
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: User = Depends(get_current_user)
 ) -> ProductResponse:
     try:
         created = service.create_product(
@@ -58,7 +60,8 @@ def create_product(
 def get_all_products(
     skip: int = 0,
     limit: int = 100,
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: User = Depends(get_current_user)
 ) -> List[ProductResponse]:
     products = service.get_all_products(skip=skip, limit=limit)
     return [ProductResponse.model_validate(p) for p in products]
@@ -75,7 +78,8 @@ def get_all_products(
 )
 def get_product(
     product_id: int,
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: User = Depends(get_current_user)
 ) -> ProductResponse:
     try:
         product = service.get_product_by_id(product_id)
@@ -98,7 +102,8 @@ def get_product(
 def update_product(
     product_id: int,
     product_update: ProductUpdate,
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: User = Depends(get_current_user)
 ) -> ProductResponse:
     try:
         updated = service.update_product(
@@ -123,7 +128,8 @@ def update_product(
 )
 def delete_product(
     product_id: int,
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: User = Depends(get_current_user)
 ) -> None:
     try:
         service.delete_product(product_id)
@@ -145,7 +151,8 @@ def delete_product(
 def increment_stock(
     product_id: int,
     adjustment: StockAdjustment = StockAdjustment(),
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: User = Depends(get_current_user)
 ) -> ProductResponse:
     try:
         updated = service.increment_stock(
@@ -171,7 +178,8 @@ def increment_stock(
 def decrement_stock(
     product_id: int,
     adjustment: StockAdjustment = StockAdjustment(),
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: User = Depends(get_current_user)
 ) -> ProductResponse:
     try:
         updated = service.decrement_stock(

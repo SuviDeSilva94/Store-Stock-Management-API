@@ -4,13 +4,14 @@ A backend API for managing product inventory built with FastAPI and PostgreSQL.
 
 ## What This Does
 
-This is a coding assignment for managing store product stocks. The API lets you create products, update details, delete products, and adjust stock levels (increment/decrement).
+This is a API for managing store product stocks. The API lets you create products, update details, delete products, and adjust stock levels (increment/decrement). All endpoints are protected with JWT authentication.
 
 ## Tech Stack
 
 - **Python 3.11** with FastAPI
 - **PostgreSQL** for database
 - **SQLAlchemy** ORM
+- **JWT Authentication** for security
 - **Docker** for containerization
 - **pytest** for testing
 
@@ -32,38 +33,80 @@ The API will be available at `http://localhost:8001`
 
 API docs: `http://localhost:8001/docs`
 
-## API Endpoints
+## Authentication
 
-All endpoints are under `/api/v1/products`
+All product endpoints require JWT authentication. First register a user, then login to get an access token.
+
+### Auth Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/products` | Create a new product |
-| GET | `/products` | Get all products (with pagination) |
-| GET | `/products/{id}` | Get product by ID |
-| PUT | `/products/{id}` | Update product |
-| DELETE | `/products/{id}` | Delete product |
-| POST | `/products/{id}/increment` | Increase stock |
-| POST | `/products/{id}/decrement` | Decrease stock |
+| POST | `/api/v1/auth/register` | Register a new user |
+| POST | `/api/v1/auth/login` | Login and get access token |
+| GET | `/api/v1/auth/me` | Get current user info |
+
+### Product Endpoints (Requires Auth)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/products` | Create a new product |
+| GET | `/api/v1/products` | Get all products (with pagination) |
+| GET | `/api/v1/products/{id}` | Get product by ID |
+| PUT | `/api/v1/products/{id}` | Update product |
+| DELETE | `/api/v1/products/{id}` | Delete product |
+| POST | `/api/v1/products/{id}/increment` | Increase stock |
+| POST | `/api/v1/products/{id}/decrement` | Decrease stock |
 
 ## Example Usage
+
+**Step 1: Register a user**
+```bash
+curl -X POST "http://localhost:8001/api/v1/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "email": "admin@example.com", "password": "admin123"}'
+```
+
+**Step 2: Login to get access token**
+```bash
+curl -X POST "http://localhost:8001/api/v1/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin&password=admin123"
+```
+
+Response:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+**Step 3: Use the token for product operations**
+
+Set your token:
+```bash
+TOKEN="your_access_token_here"
+```
 
 **Create a product:**
 ```bash
 curl -X POST "http://localhost:8001/api/v1/products" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"name": "iPhone 16", "sku": "IP16-256-BLK", "stock": 20}'
 ```
 
 **Get all products:**
 ```bash
-curl "http://localhost:8001/api/v1/products"
+curl "http://localhost:8001/api/v1/products" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 **Increment stock:**
 ```bash
 curl -X POST "http://localhost:8001/api/v1/products/1/increment" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"amount": 5}'
 ```
 
@@ -71,6 +114,7 @@ curl -X POST "http://localhost:8001/api/v1/products/1/increment" \
 ```bash
 curl -X POST "http://localhost:8001/api/v1/products/1/decrement" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"amount": 3}'
 ```
 
@@ -92,7 +136,7 @@ chmod +x test.sh
 ./test.sh
 ```
 
-52 tests covering unit and integration testing.
+Tests covering authentication, unit, and integration testing.
 
 ## Project Structure
 
@@ -124,8 +168,9 @@ tests/
 
 ## Bonus Features Implemented
 
+- ✅ **JWT Authentication** (register, login, protected endpoints)
 - ✅ Pagination on GET /products (skip/limit parameters)
-- ✅ Unit and integration tests (52 tests)
+- ✅ Unit and integration tests
 - ✅ Docker + docker-compose setup
 - ✅ Database transactions
 - ✅ Proper error handling
@@ -137,6 +182,7 @@ All 7 required endpoints working with proper status codes:
 - 200 OK
 - 204 No Content
 - 400 Bad Request
+- 401 Unauthorized
 - 404 Not Found
 
 Stock never goes below zero (enforced in business logic).
@@ -155,7 +201,3 @@ DATABASE_URL=postgresql://postgres:postgres@db:5432/store_stock
 ```bash
 docker-compose down
 ```
-
----
-
-Built for IKEA Senior Software Engineer - AI position coding assignment.
